@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useAppStore } from "@/lib/context";
 import ChoreCard from "@/components/ChoreCard";
 
@@ -16,14 +15,16 @@ function displayDate(d: string) {
 
 export default function Dashboard() {
   const { members, chores, hydrated } = useAppStore();
-  const searchParams = useSearchParams();
   const [selectedDate, setSelectedDate] = useState(fmt(new Date()));
   const [filterMember, setFilterMember] = useState<string>("all");
 
   useEffect(() => {
-    const d = searchParams.get("date");
-    if (d) setSelectedDate(d);
-  }, [searchParams]);
+    const jump = sessionStorage.getItem("jump_date");
+    if (jump) {
+      setSelectedDate(jump);
+      sessionStorage.removeItem("jump_date");
+    }
+  }, []);
 
   if (!hydrated) return null;
 
@@ -46,6 +47,7 @@ export default function Dashboard() {
     d.setDate(d.getDate() - 1);
     setSelectedDate(fmt(d));
   };
+
   const nextDay = () => {
     const d = new Date(selectedDate + "T00:00:00");
     d.setDate(d.getDate() + 1);
@@ -99,9 +101,7 @@ export default function Dashboard() {
           <button
             onClick={() => setFilterMember("all")}
             className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
-              filterMember === "all"
-                ? "bg-gray-800 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              filterMember === "all" ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             All Members

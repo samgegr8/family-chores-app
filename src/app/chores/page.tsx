@@ -31,7 +31,8 @@ export default function AddChorePage() {
       completed: false,
       recurring,
     });
-    router.push(`/?date=${date}`);
+    sessionStorage.setItem("jump_date", date);
+    router.push("/");
   }
 
   if (!hydrated) return null;
