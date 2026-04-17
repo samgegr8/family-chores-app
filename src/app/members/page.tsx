@@ -11,17 +11,20 @@ export default function MembersPage() {
   const [color, setColor] = useState(MEMBER_COLORS[0]);
   const [avatar, setAvatar] = useState(MEMBER_AVATARS[0]);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) { setError("Name is required"); return; }
+    setSaving(true);
+    setError("");
     const err = await addMember({ id: uuidv4(), name: name.trim(), color, avatar });
+    setSaving(false);
     if (err) {
-      setError("Failed to save: " + err);
+      setError("❌ Failed to save: " + err);
       return;
     }
     setName("");
-    setError("");
   }
 
   if (!hydrated) return null;
@@ -91,9 +94,10 @@ export default function MembersPage() {
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition-colors text-sm"
+            disabled={saving}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium py-2 rounded-lg transition-colors text-sm"
           >
-            Add Member
+            {saving ? "Saving to Firebase…" : "Add Member"}
           </button>
         </div>
       </form>
