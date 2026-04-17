@@ -9,6 +9,13 @@ import { FamilyMember, Chore } from "./types";
 
 const FAMILY_CODE_KEY = "chores_family_code";
 
+// Firestore rejects undefined values — strip them before writing
+function stripUndefined<T extends object>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined)
+  ) as T;
+}
+
 function getFamilyCode(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(FAMILY_CODE_KEY);
@@ -112,7 +119,7 @@ export function useStore() {
   const addChore = useCallback(async (chore: Chore): Promise<string | null> => {
     if (!familyCode) return "No family code set";
     try {
-      await setDoc(doc(db, "families", familyCode, "chores", chore.id), chore);
+      await setDoc(doc(db, "families", familyCode, "chores", chore.id), stripUndefined(chore));
       return null;
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
