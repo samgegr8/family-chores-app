@@ -82,9 +82,16 @@ export function useStore() {
     setChores([]);
   }, []);
 
-  const addMember = useCallback(async (member: FamilyMember) => {
-    if (!familyCode) return;
-    await setDoc(doc(db, "families", familyCode, "members", member.id), member);
+  const addMember = useCallback(async (member: FamilyMember): Promise<string | null> => {
+    if (!familyCode) return "No family code set";
+    try {
+      await setDoc(doc(db, "families", familyCode, "members", member.id), member);
+      return null;
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("addMember failed:", msg);
+      return msg;
+    }
   }, [familyCode]);
 
   const updateMember = useCallback(async (id: string, patch: Partial<FamilyMember>) => {

@@ -6,16 +6,20 @@ import MemberCard from "@/components/MemberCard";
 import { v4 as uuidv4 } from "uuid";
 
 export default function MembersPage() {
-  const { members, addMember, hydrated } = useAppStore();
+  const { members, addMember, hydrated, connectionError, familyCode } = useAppStore();
   const [name, setName] = useState("");
   const [color, setColor] = useState(MEMBER_COLORS[0]);
   const [avatar, setAvatar] = useState(MEMBER_AVATARS[0]);
   const [error, setError] = useState("");
 
-  function handleAdd(e: React.FormEvent) {
+  async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) { setError("Name is required"); return; }
-    addMember({ id: uuidv4(), name: name.trim(), color, avatar });
+    const err = await addMember({ id: uuidv4(), name: name.trim(), color, avatar });
+    if (err) {
+      setError("Failed to save: " + err);
+      return;
+    }
     setName("");
     setError("");
   }
@@ -24,7 +28,17 @@ export default function MembersPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-28 sm:pb-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Family Members</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">Family Members</h1>
+
+      {connectionError ? (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-sm text-red-700">
+          🔌 <strong>Database error:</strong> {connectionError}
+        </div>
+      ) : (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4 text-sm text-green-700">
+          ✅ Connected — code: <strong>{familyCode}</strong>
+        </div>
+      )}
 
       <form onSubmit={handleAdd} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-8">
         <h2 className="font-semibold text-gray-700 mb-4">Add Member</h2>
