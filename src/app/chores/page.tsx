@@ -17,11 +17,11 @@ export default function AddChorePage() {
   const [recurring, setRecurring] = useState<"none" | "daily" | "weekly">("none");
   const [error, setError] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) { setError("Title is required"); return; }
     if (!assignedTo) { setError("Please assign this chore to a family member"); return; }
-    addChore({
+    await addChore({
       id: uuidv4(),
       title: title.trim(),
       description: description.trim() || undefined,
@@ -31,7 +31,7 @@ export default function AddChorePage() {
       completed: false,
       recurring,
     });
-    router.push("/");
+    router.push(`/?date=${date}`);
   }
 
   if (!hydrated) return null;

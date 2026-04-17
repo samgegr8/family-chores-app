@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAppStore } from "@/lib/context";
 import ChoreCard from "@/components/ChoreCard";
 
@@ -15,8 +16,14 @@ function displayDate(d: string) {
 
 export default function Dashboard() {
   const { members, chores, hydrated } = useAppStore();
+  const searchParams = useSearchParams();
   const [selectedDate, setSelectedDate] = useState(fmt(new Date()));
   const [filterMember, setFilterMember] = useState<string>("all");
+
+  useEffect(() => {
+    const d = searchParams.get("date");
+    if (d) setSelectedDate(d);
+  }, [searchParams]);
 
   if (!hydrated) return null;
 
