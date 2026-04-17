@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAppStore } from "@/lib/context";
 
 const links = [
   {
@@ -34,6 +35,7 @@ const links = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { familyCode, leaveFamily } = useAppStore();
 
   return (
     <>
@@ -43,8 +45,13 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <span className="text-2xl">🏠</span>
             <span className="font-bold text-lg text-indigo-700">FamilyChores</span>
+            {familyCode && (
+              <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded-full font-mono font-semibold">
+                {familyCode}
+              </span>
+            )}
           </div>
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1">
             {links.map((l) => (
               <Link
                 key={l.href}
@@ -58,15 +65,40 @@ export default function Navbar() {
                 {l.label}
               </Link>
             ))}
+            {familyCode && (
+              <button
+                onClick={leaveFamily}
+                className="ml-2 text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1 rounded"
+                title="Switch family"
+              >
+                Switch
+              </button>
+            )}
           </div>
         </div>
       </nav>
 
       {/* Mobile top header */}
       <header className="sm:hidden bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-center h-12">
-          <span className="text-lg mr-1">🏠</span>
-          <span className="font-bold text-base text-indigo-700">FamilyChores</span>
+        <div className="flex items-center justify-between h-12 px-4">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg">🏠</span>
+            <span className="font-bold text-base text-indigo-700">FamilyChores</span>
+          </div>
+          {familyCode && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-mono font-semibold">
+                {familyCode}
+              </span>
+              <button
+                onClick={leaveFamily}
+                className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                title="Switch family"
+              >
+                Switch
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
