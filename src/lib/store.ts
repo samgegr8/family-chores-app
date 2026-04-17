@@ -27,6 +27,7 @@ export function useStore() {
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [chores, setChores] = useState<Chore[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // Load family code from localStorage on mount
   useEffect(() => {
@@ -45,18 +46,23 @@ export function useStore() {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 30);
 
+    const onError = (err: Error) => {
+      console.error("Firestore error:", err);
+      setConnectionError("Cannot connect to database. Check your Firebase setup in Vercel environment variables.");
+    };
+
     const unsubMembers = onSnapshot(membersRef, (snap) => {
+      setConnectionError(null);
       setMembers(snap.docs.map((d) => d.data() as FamilyMember));
-    });
+    }, onError);
 
     const unsubChores = onSnapshot(choresRef, (snap) => {
       const all = snap.docs.map((d) => d.data() as Chore);
-      // Prune completed chores older than 30 days (local filter only)
       setChores(all.filter((c) => {
         if (!c.completed) return true;
         return new Date(c.date + "T00:00:00") >= cutoff;
       }));
-    });
+    }, onError);
 
     return () => {
       unsubMembers();
@@ -122,7 +128,7 @@ export function useStore() {
   }, [familyCode, chores]);
 
   return {
-    familyCode, members, chores, hydrated,
+    familyCode, members, chores, hydrated, connectionError,
     joinFamily, leaveFamily,
     addMember, updateMember, deleteMember,
     addChore, updateChore, deleteChore, toggleChore,
