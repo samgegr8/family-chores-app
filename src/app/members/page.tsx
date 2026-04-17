@@ -38,8 +38,9 @@ export default function MembersPage() {
           🔌 <strong>Database error:</strong> {connectionError}
         </div>
       ) : (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4 text-sm text-green-700">
-          ✅ Connected — code: <strong>{familyCode}</strong>
+        <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4 text-sm text-green-700 space-y-0.5">
+          <div>✅ Connected — code: <strong>{familyCode}</strong></div>
+          <div className="text-xs text-green-600 font-mono">Project: {process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "⚠️ NOT SET"}</div>
         </div>
       )}
 
