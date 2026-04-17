@@ -109,9 +109,16 @@ export function useStore() {
     );
   }, [familyCode, chores]);
 
-  const addChore = useCallback(async (chore: Chore) => {
-    if (!familyCode) return;
-    await setDoc(doc(db, "families", familyCode, "chores", chore.id), chore);
+  const addChore = useCallback(async (chore: Chore): Promise<string | null> => {
+    if (!familyCode) return "No family code set";
+    try {
+      await setDoc(doc(db, "families", familyCode, "chores", chore.id), chore);
+      return null;
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("addChore failed:", msg);
+      return msg;
+    }
   }, [familyCode]);
 
   const updateChore = useCallback(async (id: string, patch: Partial<Chore>) => {

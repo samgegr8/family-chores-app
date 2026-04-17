@@ -17,12 +17,15 @@ export default function AddChorePage() {
   const [time, setTime] = useState("");
   const [recurring, setRecurring] = useState<"none" | "daily" | "weekly">("none");
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) { setError("Title is required"); return; }
     if (!assignedTo) { setError("Please assign this chore to a family member"); return; }
-    await addChore({
+    setSaving(true);
+    setError("");
+    const err = await addChore({
       id: uuidv4(),
       title: title.trim(),
       description: description.trim() || undefined,
@@ -32,6 +35,8 @@ export default function AddChorePage() {
       completed: false,
       recurring,
     });
+    setSaving(false);
+    if (err) { setError("❌ Failed to save: " + err); return; }
     sessionStorage.setItem("jump_date", date);
     router.push("/");
   }
@@ -145,9 +150,10 @@ export default function AddChorePage() {
           </button>
           <button
             type="submit"
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition-colors text-sm"
+            disabled={saving}
+            className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium py-2 rounded-lg transition-colors text-sm"
           >
-            Add Chore
+            {saving ? "Saving…" : "Add Chore"}
           </button>
         </div>
       </form>
