@@ -82,11 +82,22 @@ export default function Dashboard() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div className="text-center">
-          <p className="text-base sm:text-lg font-bold text-gray-900 leading-tight">{displayDate(selectedDate)}</p>
-          {selectedDate === fmt(new Date()) && (
-            <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Today</span>
-          )}
+        <div className="text-center relative">
+          <label className="cursor-pointer group">
+            <p className="text-base sm:text-lg font-bold text-gray-900 leading-tight group-hover:text-indigo-600 transition-colors">
+              {displayDate(selectedDate)}
+              <span className="ml-1 text-xs text-gray-400 group-hover:text-indigo-400">📅</span>
+            </p>
+            {selectedDate === fmt(new Date()) && (
+              <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Today</span>
+            )}
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
+              className="absolute inset-0 opacity-0 cursor-pointer w-full"
+            />
+          </label>
         </div>
         <button onClick={nextDay} className="p-3 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors active:scale-95">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
