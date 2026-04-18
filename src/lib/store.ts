@@ -138,14 +138,24 @@ export function useStore() {
     await deleteDoc(doc(db, "families", familyCode, "chores", id));
   }, [familyCode]);
 
-  const toggleChore = useCallback(async (id: string) => {
+  const toggleChore = useCallback(async (id: string, date?: string) => {
     if (!familyCode) return;
     const chore = chores.find((c) => c.id === id);
     if (!chore) return;
-    await updateDoc(doc(db, "families", familyCode, "chores", id), {
-      completed: !chore.completed,
-      completedAt: !chore.completed ? new Date().toISOString() : null,
-    });
+
+    if (chore.recurring && chore.recurring !== "none" && date) {
+      // Per-date completion for recurring chores
+      const dates = chore.completedDates ?? [];
+      const isDone = dates.includes(date);
+      await updateDoc(doc(db, "families", familyCode, "chores", id), {
+        completedDates: isDone ? dates.filter((d) => d !== date) : [...dates, date],
+      });
+    } else {
+      await updateDoc(doc(db, "families", familyCode, "chores", id), {
+        completed: !chore.completed,
+        completedAt: !chore.completed ? new Date().toISOString() : null,
+      });
+    }
   }, [familyCode, chores]);
 
   return {

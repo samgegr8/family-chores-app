@@ -31,11 +31,27 @@ export default function Dashboard() {
 
   if (!hydrated) return null;
 
-  const dateChores = chores.filter((c) => c.date === selectedDate);
+  function isChoreOnDate(c: (typeof chores)[0], d: string) {
+    if (c.date === d) return true;
+    if (!c.recurring || c.recurring === "none") return false;
+    if (c.date > d) return false;
+    const msPerDay = 864e5;
+    const diff = Math.round((new Date(d + "T00:00:00").getTime() - new Date(c.date + "T00:00:00").getTime()) / msPerDay);
+    return c.recurring === "daily" || (c.recurring === "weekly" && diff % 7 === 0);
+  }
+
+  function isChoreCompleted(c: (typeof chores)[0], d: string) {
+    if (c.recurring && c.recurring !== "none") return (c.completedDates ?? []).includes(d);
+    return c.completed;
+  }
+
+  const dateChores = chores.filter((c) => isChoreOnDate(c, selectedDate));
   const filtered = filterMember === "all" ? dateChores : dateChores.filter((c) => c.assignedTo === filterMember);
 
   const sorted = [...filtered].sort((a, b) => {
-    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    const aDone = isChoreCompleted(a, selectedDate);
+    const bDone = isChoreCompleted(b, selectedDate);
+    if (aDone !== bDone) return aDone ? 1 : -1;
     if (a.time && b.time) return a.time.localeCompare(b.time);
     if (a.time) return -1;
     if (b.time) return 1;
@@ -43,7 +59,7 @@ export default function Dashboard() {
   });
 
   const totalToday = dateChores.length;
-  const doneToday = dateChores.filter((c) => c.completed).length;
+  const doneToday = dateChores.filter((c) => isChoreCompleted(c, selectedDate)).length;
 
   const prevDay = () => {
     const d = new Date(selectedDate + "T00:00:00");
@@ -146,8 +162,9 @@ export default function Dashboard() {
         <div className="space-y-3">
           {sorted.map((chore) => (
             <ChoreCard
-              key={chore.id}
+              key={chore.id + selectedDate}
               chore={chore}
+              date={selectedDate}
               member={members.find((m) => m.id === chore.assignedTo)}
             />
           ))}

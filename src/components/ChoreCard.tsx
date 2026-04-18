@@ -5,28 +5,34 @@ import { useAppStore } from "@/lib/context";
 interface Props {
   chore: Chore;
   member?: FamilyMember;
+  date: string; // the date being viewed (YYYY-MM-DD)
 }
 
-export default function ChoreCard({ chore, member }: Props) {
+export default function ChoreCard({ chore, member, date }: Props) {
   const { toggleChore, deleteChore } = useAppStore();
+
+  const isRecurring = chore.recurring && chore.recurring !== "none";
+  const completed = isRecurring
+    ? (chore.completedDates ?? []).includes(date)
+    : chore.completed;
 
   return (
     <div
       className={`flex items-start gap-3 p-4 rounded-xl border transition-all ${
-        chore.completed
+        completed
           ? "bg-gray-50 border-gray-200 opacity-70"
           : "bg-white border-gray-200 shadow-sm hover:shadow-md"
       }`}
     >
       <button
-        onClick={() => toggleChore(chore.id)}
+        onClick={() => toggleChore(chore.id, date)}
         className={`mt-0.5 w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors active:scale-90 ${
-          chore.completed
+          completed
             ? "bg-green-500 border-green-500 text-white"
             : "border-gray-300 hover:border-green-400"
         }`}
       >
-        {chore.completed && (
+        {completed && (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
@@ -34,7 +40,7 @@ export default function ChoreCard({ chore, member }: Props) {
       </button>
 
       <div className="flex-1 min-w-0">
-        <p className={`font-medium text-sm ${chore.completed ? "line-through text-gray-400" : "text-gray-800"}`}>
+        <p className={`font-medium text-sm ${completed ? "line-through text-gray-400" : "text-gray-800"}`}>
           {chore.title}
         </p>
         {chore.description && (

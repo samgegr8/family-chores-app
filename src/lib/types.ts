@@ -10,11 +10,12 @@ export interface Chore {
   title: string;
   description?: string;
   assignedTo: string; // FamilyMember id
-  date: string; // YYYY-MM-DD
+  date: string; // YYYY-MM-DD start date
   time?: string; // HH:MM
-  completed: boolean;
+  completed: boolean; // used for one-time chores
   completedAt?: string;
   recurring?: "daily" | "weekly" | "none";
+  completedDates?: string[]; // YYYY-MM-DD dates completed, used for recurring chores
 }
 
 export const MEMBER_COLORS = [
